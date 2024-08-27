@@ -108,22 +108,57 @@ function depthLimitedSearch(chess, depth) {
 }
 
 function makeComputerMove() {
+    var output = document.getElementById('solutionList');
     let bestMove = ids(game, 6);
     if (bestMove === null) {
         var checkSound = document.getElementById("checkSound3");
         checkSound.play();
-        return 'snapback';
+        return 'snapback';  
     }
 
     game.move(bestMove);
     board.position(game.fen());
+    
     console.log("Best move by computer:", bestMove);
+    output.innerHTML += bestMove + " ";
     var checkSound = document.getElementById("checkSound1");
     checkSound.play();
 
     if (game.in_check()) {
         var checkSound = document.getElementById("checkSound");
         checkSound.play();
+    }
+
+    if (game.in_stalemate()) {
+        $(".notification").addClass('show');
+        setTimeout(function() {
+            $(".notification").removeClass('show');
+        }, 3000);
+        return;
+    }
+
+    if (game.in_threefold_repetition()) {
+        $(".notification-2").addClass( 'show');
+        setTimeout(function() {
+            $(".notification-2").removeClass('show');
+        }, 3000);
+        return;
+    }
+
+    if (game.insufficient_material()) {
+        $(".notification").addClass('show');
+        setTimeout(function() {
+            $(".notification").removeClass('show');
+        }, 3000);
+        return;
+    }
+
+    if (game.in_draw()) {
+        $(".notification-2").addClass('show');
+        setTimeout(function() {
+            $(".notification-2").removeClass('show');
+        }, 3000);
+        return;
     }
 
     if (game.game_over()) {
@@ -137,9 +172,11 @@ function makeComputerMove() {
 }
 
 $(document).ready(function () {
+    var output = document.getElementById('solutionList');
     $('#startBtn').on('click', function () {
         game.reset();  
         board.start();
+        output.innerHTML = "";
         $(".notification").removeClass('show');
     });
 
@@ -154,6 +191,7 @@ $(document).ready(function () {
     });
 
     document.getElementById('solveButton').addEventListener('click', function () {
+        var output = document.getElementById('solutionList');
         let bestMove = ids(game, 6);
         if (bestMove) {
             game.move(bestMove);
@@ -161,7 +199,14 @@ $(document).ready(function () {
             var checkSound = document.getElementById("checkSound1");
             checkSound.play();
             console.log("Best move:", bestMove);
+            output.innerHTML += bestMove + " ";
         } else {
+            var checkSound = document.getElementById("checkSound4");
+            checkSound.play();
+            $(".notification").addClass('show');
+            setTimeout(function() {
+                $(".notification").removeClass('show');
+            }, 3000);
             console.log("No move found.");
         }
     });
